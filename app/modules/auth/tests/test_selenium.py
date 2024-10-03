@@ -35,7 +35,7 @@ def test_login_and_check_element():
 
         try:
 
-            driver.find_element(By.XPATH, "//h1[contains(@class, 'h2 mb-3') and contains(., 'Latest datasets')]")
+            driver.find_element(By.XPATH, "//h1[contains(@class, 'h2 mb-3') and contains(., 'Latest Datasets')]")
             print('Test passed!')
 
         except NoSuchElementException:
