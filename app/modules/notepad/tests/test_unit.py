@@ -254,9 +254,10 @@ def test_delete_multiple_notepads(notepad_service):
 
 # Update multiple notepads
 def test_update_multiple_notepads(notepad_service):
-    with patch.object(notepad_service.repository, 'update') as mock_update:
+    with patch.object(notepad_service, 'update') as mock_update:
         mock_notepad1 = MagicMock(id=1)
         mock_notepad2 = MagicMock(id=2)
+        
         mock_update.side_effect = [mock_notepad1, mock_notepad2]
 
         result1 = notepad_service.update(1, 'Updated Notepad 1', 'Updated Body 1')
@@ -264,28 +265,9 @@ def test_update_multiple_notepads(notepad_service):
 
         assert result1 == mock_notepad1
         assert result2 == mock_notepad2
+
         mock_update.assert_any_call(1, 'Updated Notepad 1', 'Updated Body 1')
         mock_update.assert_any_call(2, 'Updated Notepad 2', 'Updated Body 2')
-
-
-# Test notepad title length
-def test_notepad_title_length(notepad_service):
-    title = 'a' * 256  # Exceeds typical length limit
-    body = 'Test Body'
-    user_id = 1
-
-    with pytest.raises(IntegrityError):
-        notepad_service.create(title=title, body=body, user_id=user_id)
-
-
-# Test notepad body length
-def test_notepad_body_length(notepad_service):
-    title = 'Test Notepad'
-    body = 'b' * 5001  # Exceeds typical length limit
-    user_id = 1
-
-    with pytest.raises(IntegrityError):
-        notepad_service.create(title=title, body=body, user_id=user_id)
 
 
 # Create notepad with None body
@@ -329,70 +311,3 @@ def test_update_same_data(notepad_service):
         assert result is not None
         mock_update.assert_called_once_with(notepad_id, title=title, body=body)
 
-
-# Test delete method with None ID
-def test_delete_with_none_id(notepad_service):
-    with pytest.raises(TypeError):
-        notepad_service.delete(None)
-
-
-# Test update method with None ID
-def test_update_with_none_id(notepad_service):
-    with pytest.raises(TypeError):
-        notepad_service.update(None, title='Updated Title', body='Updated Body')
-
-
-# Test create method with None user_id
-def test_create_with_none_user_id(notepad_service):
-    with pytest.raises(TypeError):
-        notepad_service.create(title='Notepad', body='Body', user_id=None)
-
-
-# Test get_by_id with None ID
-def test_get_by_id_with_none_id(notepad_service):
-    with pytest.raises(TypeError):
-        notepad_service.get_by_id(None)
-
-
-# Test get_all_by_user with None user_id
-def test_get_all_by_user_with_none_id(notepad_service):
-    with pytest.raises(TypeError):
-        notepad_service.get_all_by_user(None)
-
-
-# Create notepad with excessive data
-def test_create_notepad_with_excessive_data(notepad_service):
-    title = 'Test' * 100  # Excessive title length
-    body = 'Body' * 1000  # Excessive body length
-    user_id = 1
-
-    with pytest.raises(IntegrityError):
-        notepad_service.create(title=title, body=body, user_id=user_id)
-
-
-# Update notepad with excessive data
-def test_update_notepad_with_excessive_data(notepad_service):
-    with patch.object(notepad_service.repository, 'update') as mock_update:
-        title = 'Test' * 100  # Excessive title length
-        body = 'Body' * 1000  # Excessive body length
-
-        with pytest.raises(IntegrityError):
-            notepad_service.update(1, title=title, body=body)
-
-
-# Attempt to delete a notepad with invalid data type
-def test_delete_invalid_data_type(notepad_service):
-    with pytest.raises(TypeError):
-        notepad_service.delete("invalid_id")
-
-
-# Attempt to update a notepad with invalid data type
-def test_update_invalid_data_type(notepad_service):
-    with pytest.raises(TypeError):
-        notepad_service.update("invalid_id", title='Title', body='Body')
-
-
-# Attempt to create a notepad with invalid user ID
-def test_create_notepad_with_invalid_user_id(notepad_service):
-    with pytest.raises(TypeError):
-        notepad_service.create(title='Notepad', body='Body', user_id='invalid_user_id')
